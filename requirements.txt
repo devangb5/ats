@@ -1,0 +1,6 @@
+streamlit
+pdfminer.six
+pdf2image
+google-generativeai
+fpdf
+Pillow
