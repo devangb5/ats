@@ -5,7 +5,7 @@ import json
 import base64
 import google.generativeai as genai
 from fpdf import FPDF
-import pdfminer.high_level  # For extracting text from PDFs
+import pdfminer.high_level  # Import pdfminer to extract text from PDF
 
 # Ensure the API key is correctly stored in secrets.toml
 api_key = st.secrets["API_KEY"]  # Accessing the API key
@@ -80,43 +80,10 @@ def generate_recommendations(missing_skills, experience_assessment, cultural_fit
     return recommendations
 
 def suggest_job_titles(resume_text):
-    """Generate relevant job titles based on the resume text."""
-    # For demonstration purposes, we'll use a simple list of job titles.
-    # In a real application, this could be enhanced with an AI model or a larger dataset.
-    job_titles = [
-        "Software Engineer",
-        "Data Analyst",
-        "Project Manager",
-        "Business Analyst",
-        "Marketing Specialist",
-        "Product Manager",
-        "Sales Executive",
-        "HR Manager",
-        "UX/UI Designer",
-        "Network Administrator",
-        "Technical Writer",
-        "Account Manager",
-        "Operations Manager"
-    ]
-
-    # This is a simple matching process based on keywords found in the resume text.
-    # In a production scenario, you might want to use more advanced NLP techniques.
-    relevant_titles = []
-    keywords = {
-        "software": ["Software Engineer", "Web Developer", "Backend Developer"],
-        "data": ["Data Analyst", "Data Scientist", "Business Intelligence Analyst"],
-        "manager": ["Project Manager", "Product Manager", "Operations Manager"],
-        "marketing": ["Marketing Specialist", "Digital Marketing Manager"],
-        "sales": ["Sales Executive", "Account Manager"],
-        "hr": ["HR Manager", "Recruitment Specialist"],
-        "designer": ["UX/UI Designer", "Graphic Designer"],
-    }
-
-    for keyword, titles in keywords.items():
-        if keyword in resume_text.lower():
-            relevant_titles.extend(titles)
-
-    return list(set(relevant_titles))  # Remove duplicates
+    """Generate relevant job titles based on the resume text using AI."""
+    prompt = f"Based on the following resume content, suggest relevant job titles:\n\n{resume_text}\n\nSuggested job titles:"
+    response = model.generate_content([prompt])
+    return response.text.strip()
 
 # Streamlit App
 st.set_page_config(page_title="ATS Resume Scanner")
@@ -172,6 +139,35 @@ input_prompt3 = """ You are a skilled ATS (Applicant Tracking System) scanner wi
 your task is to evaluate the resume against the provided job description. Give me the percentage of match if the resume matches
 the job description. First the output should come as percentage and then keywords missing and last final thoughts."""
 
+# Additional prompts
+input_prompt4 = """ As an HR professional, your task is to analyze the provided resume in relation to the job description. 
+Evaluate the candidate's overall experience based on the years of experience, relevance of previous roles, 
+and specific achievements that align with the job requirements. 
+Provide a summary of how well the candidate’s experience matches the job position."""
+
+input_prompt5 = """ You are an expert in organizational culture and team dynamics. 
+Assess the provided resume against the job description and identify how well the candidate fits into the company's culture. 
+Consider factors such as work style, values, and previous work environments that may influence their fit. 
+Provide a detailed analysis of the candidate’s potential cultural fit."""
+
+input_prompt6 = """ As an experienced recruiter, evaluate the provided resume in relation to the job description to identify the soft skills demonstrated. 
+Highlight the candidate's communication skills, teamwork, adaptability, and problem-solving abilities. 
+Discuss how these skills may impact their success in the role."""
+
+input_prompt7 = """ As an education specialist, review the candidate’s educational background and certifications against the job description. 
+Discuss the relevance of their degrees, any certifications that may enhance their candidacy, and how their educational qualifications align with the role."""
+
+input_prompt8 = """ Analyze the candidate’s career progression as outlined in the resume. 
+Consider the trajectory of their career, promotions, and transitions between roles. 
+Discuss whether their career path indicates growth and alignment with the job they are applying for."""
+
+input_prompt9 = """ Assess the technical skills listed on the resume against the job description. 
+Identify any key technical skills required for the position and evaluate how well the candidate meets these requirements. 
+Provide a summary of the candidate's technical abilities and any gaps that may exist."""
+
+input_prompt10 = """ Based on the analysis of the provided resume and job description, provide an overall recommendation for the candidate. 
+State whether the candidate should be shortlisted for an interview and justify your recommendation with key points from your analysis."""
+
 # Handling resume analysis
 if submit1:
     if st.session_state.resume is not None:
@@ -226,10 +222,10 @@ if submit_recruiter:
 # Job Title Suggestions
 if st.button("Suggest Relevant Job Titles"):
     if st.session_state.resume is not None:
-        relevant_job_titles = suggest_job_titles(resume_text)
+        job_titles = suggest_job_titles(resume_text)
         st.subheader("Suggested Job Titles")
-        if relevant_job_titles:
-            st.write(", ".join(relevant_job_titles))
+        if job_titles:
+            st.write(job_titles)
         else:
             st.write("No relevant job titles found.")
     else:
