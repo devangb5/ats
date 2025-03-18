@@ -70,7 +70,7 @@ def resume_format_feedback(resume_text):
     lines = resume_text.split("\n")
     bullet_points = sum(1 for line in lines if line.strip().startswith(("-", "•", "*")))
     word_count = len(resume_text.split())
-s
+
     feedback = []
     if bullet_points < 5:
         feedback.append("🔹 Use more bullet points for better readability.")
